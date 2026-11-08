@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CRM · Caio Araújo — Advocacia</title>
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
 
@@ -52,7 +52,23 @@
       </div>
     </header>
 
-    <main id="board" class="board" aria-live="polite"></main>
+    <nav class="tabs" role="tablist" aria-label="Seções">
+      <button class="tab is-active" data-view="board" role="tab">Mural</button>
+      <button class="tab" data-view="dash" role="tab">Resultados</button>
+      <button class="tab" data-view="clients" role="tab">Clientes</button>
+    </nav>
+
+    <!-- Mural (kanban) -->
+    <section id="board-view" class="view">
+      <main id="board" class="board" aria-live="polite"></main>
+    </section>
+
+    <!-- Resultados (dashboard) -->
+    <section id="dash-view" class="view" hidden></section>
+
+    <!-- Clientes (lista) -->
+    <section id="clients-view" class="view" hidden></section>
+
     <div id="board-status" class="board-status"></div>
   </div>
 
@@ -68,6 +84,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js?v=1"></script>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

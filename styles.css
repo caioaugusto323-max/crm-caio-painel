@@ -42,7 +42,7 @@ button { font-family: inherit; cursor: pointer; }
 .btn-primary { background: var(--ink); color: #FEFEFE; width: 100%; padding: 12px; }
 .btn-primary:hover { background: #16222f; }
 .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink-soft); padding: 8px 12px; }
-.btn-ghost:hover { background: #efe9df; }
+.btn-ghost:hover { background: #E9EEF4; }
 
 /* ---------- Login ---------- */
 .login { min-height: 100%; display: grid; place-items: center; padding: 24px; }
@@ -57,7 +57,7 @@ button { font-family: inherit; cursor: pointer; }
 .login-card label { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); margin-bottom: 14px; }
 .login-card input {
   width: 100%; margin-top: 6px; padding: 11px 12px; font-size: 14px;
-  border: 1px solid var(--line); border-radius: 9px; background: #fbf9f5; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 9px; background: #F6F8FB; color: var(--ink);
 }
 .login-card input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
 .login-error { color: var(--danger); font-size: 13px; min-height: 18px; margin: 12px 0 0; text-align: center; }
@@ -78,7 +78,7 @@ button { font-family: inherit; cursor: pointer; }
   height: calc(100vh - 67px);
 }
 .col {
-  flex: 0 0 272px; background: #efe9df; border: 1px solid var(--line);
+  flex: 0 0 272px; background: #E3EAF2; border: 1px solid var(--line);
   border-radius: var(--radius); display: flex; flex-direction: column; max-height: 100%;
 }
 .col-head {
@@ -89,7 +89,7 @@ button { font-family: inherit; cursor: pointer; }
 .col-dot { width: 9px; height: 9px; border-radius: 50%; }
 .col-tally { font-size: 12px; color: var(--muted); background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 1px 8px; }
 .col-body { padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 60px; }
-.col-body.drag-over { background: #e6ddcd; border-radius: 8px; }
+.col-body.drag-over { background: #D4DEE8; border-radius: 8px; }
 .col-empty { color: var(--muted); font-size: 12px; text-align: center; padding: 14px 6px; opacity: .7; }
 
 /* ---------- Card ---------- */

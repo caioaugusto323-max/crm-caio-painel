@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CRM · Caio Araújo — Advocacia</title>
+  <link rel="stylesheet" href="styles.css?v=3" />
+</head>
+<body>
+
+  <!-- ===== Login ===== -->
+  <section id="login-view" class="login" hidden>
+    <form id="login-form" class="login-card" autocomplete="on">
+      <div class="brand brand--login">
+        <span class="brand-mark">CA</span>
+        <div class="brand-text">
+          <strong>Caio Araújo</strong>
+          <span>Advocacia</span>
+        </div>
+      </div>
+      <h1>Painel de atendimento</h1>
+      <p class="login-sub">Acesso restrito ao escritório.</p>
+
+      <label>
+        E-mail
+        <input type="email" id="login-email" required autocomplete="username" placeholder="voce@exemplo.com" />
+      </label>
+      <label>
+        Senha
+        <input type="password" id="login-password" required autocomplete="current-password" placeholder="••••••••" />
+      </label>
+
+      <button type="submit" id="login-btn" class="btn btn-primary">Entrar</button>
+      <p id="login-error" class="login-error" role="alert"></p>
+    </form>
+  </section>
+
+  <!-- ===== App ===== -->
+  <div id="app-view" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CA</span>
+        <div class="brand-text">
+          <strong>Caio Araújo</strong>
+          <span>Advocacia</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span id="lead-count" class="lead-count"></span>
+        <button id="refresh-btn" class="btn btn-ghost" title="Atualizar">↻ Atualizar</button>
+        <button id="logout-btn" class="btn btn-ghost">Sair</button>
+      </div>
+    </header>
+
+    <main id="board" class="board" aria-live="polite"></main>
+    <div id="board-status" class="board-status"></div>
+  </div>
+
+  <!-- ===== Detalhe do lead ===== -->
+  <div id="modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" data-close aria-label="Fechar">×</button>
+      <h2 id="modal-title"></h2>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=1"></script>
+  <script src="app.js?v=3"></script>
+</body>
+</html>

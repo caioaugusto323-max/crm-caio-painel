@@ -1,0 +1,6 @@
+# config.js É versionada de propósito: o GitHub Pages não tem servidor pra injetar
+# a config, e a anonKey (publishable) é pública por natureza — os dados ficam
+# protegidos pelo RLS do Supabase. A secret key fica fora do repo (CONEXAO-supabase.md).
+node_modules/
+.DS_Store
+*.log

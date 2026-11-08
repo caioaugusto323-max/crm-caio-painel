@@ -241,3 +241,42 @@ button { font-family: inherit; cursor: pointer; }
 .cli-tbl tbody tr:hover { background: var(--bg); }
 .cli-tbl tbody tr:last-child td { border-bottom: none; }
 #cli-table { overflow-x: auto; }
+
+/* ========== Réguas ========== */
+.regua-info { margin-bottom: 16px; }
+.regua-info p { margin: 0; font-size: 14px; line-height: 1.5; }
+.regua-ref { margin-bottom: 16px; background: var(--bg); }
+.regua-ref h3 { display: flex; align-items: center; gap: 10px; }
+.regua-tagref { font-size: 11px; font-weight: 600; color: var(--accent-dark); background: rgba(166,124,82,.14); border: 1px solid var(--line); padding: 2px 8px; border-radius: 20px; }
+.regua-ref-list { margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 13.5px; line-height: 1.6; }
+
+.regua-bloco { margin-bottom: 16px; }
+.regua-bloco-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.regua-bloco-head h3 { margin: 0; font-size: 15px; color: var(--ink); }
+.regua-add { padding: 7px 12px; font-size: 13px; }
+
+.regua-row { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); }
+.regua-row:first-of-type { border-top: none; }
+.regua-num { width: 24px; height: 24px; flex: none; display: grid; place-items: center; background: var(--ink); color: #f1e9dd; border-radius: 7px; font-size: 12px; font-weight: 700; margin-top: 4px; }
+.regua-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.regua-fields textarea {
+  font: inherit; font-size: 13.5px; width: 100%; resize: vertical;
+  border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px;
+  background: var(--panel); color: var(--ink); line-height: 1.4;
+}
+.regua-opcoes { color: var(--ink-soft) !important; background: var(--bg) !important; }
+.regua-acts { display: flex; flex-direction: column; gap: 6px; flex: none; }
+.icon-btn {
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink-soft);
+  border-radius: 7px; padding: 6px 10px; font-size: 12.5px; font-weight: 600; min-width: 68px;
+}
+.icon-btn:hover { background: var(--bg); }
+.icon-btn:disabled { opacity: .4; cursor: default; }
+.icon-btn--danger { color: var(--danger); border-color: rgba(180,69,47,.3); }
+.icon-btn--danger:hover { background: rgba(180,69,47,.08); }
+
+@media (max-width: 640px) {
+  .regua-row { flex-wrap: wrap; }
+  .regua-acts { flex-direction: row; width: 100%; }
+  .icon-btn { flex: 1; }
+}

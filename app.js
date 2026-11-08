@@ -30,6 +30,61 @@ var ASSUNTO_LABEL = {
   divorcio: 'Divórcio', guarda: 'Guarda', pensao: 'Pensão',
   inventario: 'Inventário', imovel: 'Imóvel', outros: 'Outros'
 };
+var ASSUNTO_ORDER = ['divorcio', 'guarda', 'pensao', 'inventario', 'imovel', 'outros'];
+
+// Abertura e encerramento são iguais em (quase) todos os assuntos — mostrados
+// como referência (não editáveis aqui); a lógica fina mora no bot.
+var REGUA_ABERTURA = [
+  'Nome da pessoa.',
+  'Como conheceu o escritório (Instagram · Indicação · Google · Outro) → origem.',
+  'Qual é o assunto? (menu dos 6 assuntos)'
+];
+var REGUA_BLOCO_B = 'Fim padrão de Divórcio, Guarda, Pensão, Inventário e Imóvel: o bot informa o caminho provável (sem afirmar nada jurídico — sempre remete ao Dr. Caio), apresenta a Consulta Estratégica (R$ 539,25, abatida do contrato) e bifurca entre "vou pensar" e "quero a consulta". A chave PIX, o valor e as regras de decisão ficam no bot — não se editam aqui. ("Outros" não usa este bloco: só colhe o relato e repassa pro Caio.)';
+
+// Réguas padrão do Caio (base pra semear a tabela na 1ª vez).
+var REGUAS_PADRAO = [
+  { assunto: 'divorcio', perguntas: [
+    { pergunta: 'Cidade de onde está falando.' },
+    { pergunta: 'Vocês dois estão de acordo com a separação?', opcoes: 'Sim\nAinda não' },
+    { pergunta: 'Tem filhos menores de idade?', opcoes: 'Sim\nNão' },
+    { pergunta: 'Há gravidez no momento?', opcoes: 'Sim\nNão' },
+    { pergunta: 'Em uma frase, como posso te ajudar? (sem detalhes do caso)' }
+  ]},
+  { assunto: 'guarda', perguntas: [
+    { pergunta: 'Nome e cidade de onde está falando; idade da criança envolvida.' },
+    { pergunta: 'Atualmente, como está a rotina de convivência e com quem a criança está morando?', opcoes: 'Morando comigo\nMorando com o outro genitor\nGuarda já fixada por juiz (precisa de alteração)\nSem acordo formal (situação informal)' },
+    { pergunta: 'Já existe processo judicial em andamento sobre a guarda/pensão dessa criança, ou será a primeira vez na Justiça?' },
+    { pergunta: 'Existe possibilidade de acordo amigável entre os pais, ou a situação exige ação judicial (sem consenso)?' }
+  ]},
+  { assunto: 'pensao', perguntas: [
+    { pergunta: 'Nome e cidade de onde está falando.' },
+    { pergunta: 'Para qual destas situações você precisa de ajuda hoje?', opcoes: 'Fixar pensão pela 1ª vez\nCobrar pensão em atraso (Execução)\nAumentar o valor atual (Revisional)\nDiminuir ou cancelar a pensão (Revisional / Exoneração)' },
+    { pergunta: 'A pensão é destinada a quantos filhos (ou dependentes) e qual a idade deles?' },
+    { pergunta: 'Quem deve pagar possui trabalho formal ou autônomo/informal?', opcoes: 'Carteira assinada / Servidor\nAutônomo / Empresário\nDesempregado / Sem renda formal\nNão tenho certeza' },
+    { pergunta: 'Já existe acordo fixando o valor (Justiça ou papel), ou era tudo "de boca"?' },
+    { pergunta: 'No momento, algum valor está sendo pago espontaneamente ou o pagamento foi interrompido totalmente?' }
+  ]},
+  { assunto: 'inventario', perguntas: [
+    { pergunta: 'Nome e cidade de onde está falando.' },
+    { pergunta: 'Qual era o seu grau de parentesco com a pessoa falecida (filho(a), cônjuge/viúvo(a), irmão(ã))?' },
+    { pergunta: 'Há quanto tempo ocorreu o falecimento?', opcoes: 'Menos de 60 dias\nEntre 2 e 6 meses\nMais de 6 meses\nMais de 1 ano' },
+    { pergunta: 'Existe herdeiro menor de 18 anos, incapaz, ou testamento?', opcoes: 'Todos maiores, capazes e sem testamento\nSim, há menor ou incapaz\nSim, existe testamento\nNão tenho certeza' },
+    { pergunta: 'Todos os herdeiros estão de acordo sobre a divisão, ou há conflito?', opcoes: 'Todos de acordo (Consensual)\nHá divergências (Litigioso)\nAinda não conversamos sobre isso' },
+    { pergunta: 'O patrimônio é composto por quais tipos de bens?', opcoes: 'Imóveis\nVeículos\nSaldos/Investimentos\nEmpresas/Quotas\nSem bens a partilhar' }
+  ]},
+  { assunto: 'imovel', perguntas: [
+    { pergunta: 'Nome e cidade de onde está falando.' },
+    { pergunta: 'Qual é o assunto principal relacionado ao imóvel?', opcoes: 'Regularizar imóvel / Obter escritura (Usucapião / Adjudicação)\nProblemas com Aluguel / Despejo / Inadimplemento\nInvasão / Disputa de Posse / Terreno\nAnulação de Venda / Distrato / Atraso na Entrega\nOutro assunto' },
+    { pergunta: 'Você é o proprietário registrado, posseiro/morador, locador (dono que aluga) ou inquilino?' },
+    { pergunta: 'O imóvel tem matrícula/registro definitivo no seu nome, ou só contrato de gaveta/promessa?', opcoes: 'Tem Matrícula / Registro definitivo\nApenas Contrato de Gaveta / Recibo\nNão tem documento (apenas posse de fato)\nNão sei informar' },
+    { pergunta: '(Se usucapião/posse) Há quanto tempo você/sua família está na posse de forma contínua?', opcoes: 'Menos de 5 anos\nEntre 5 e 10 anos\nMais de 10 ou 15 anos\nNão se aplica' },
+    { pergunta: 'Existe risco de perda do imóvel agora (despejo, leilão, ameaça de invasão, notificação com prazo a vencer)?' }
+  ]},
+  { assunto: 'outros', perguntas: [
+    { pergunta: 'Nome e cidade de onde está falando.' },
+    { pergunta: 'Me conta em poucas frases qual é o assunto e o que está acontecendo — o que você busca de ajuda jurídica no momento. (relato livre; o bot repassa pro Dr. Caio, sem oferecer consulta/PIX)' }
+  ]}
+];
 
 // ---------- Utilitários ----------
 var ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -94,11 +149,41 @@ async function upsertGasto(mes, google, meta) {
     .upsert({ mes: mes, google: google, meta: meta, atualizado_em: new Date().toISOString() }, { onConflict: 'mes' });
   if (r.error) throw r.error;
 }
+async function fetchReguas() {
+  var r = await sb().from('reguas').select('*').order('assunto').order('ordem');
+  if (r.error) throw r.error;
+  return r.data || [];
+}
+async function insertRegua(reg) {
+  var r = await sb().from('reguas').insert(reg).select();
+  if (r.error) throw r.error;
+  return (r.data && r.data[0]) || null;
+}
+async function updateRegua(id, patch) {
+  patch.atualizado_em = new Date().toISOString();
+  var r = await sb().from('reguas').update(patch).eq('id', id);
+  if (r.error) throw r.error;
+}
+async function deleteRegua(id) {
+  var r = await sb().from('reguas').delete().eq('id', id);
+  if (r.error) throw r.error;
+}
+async function seedReguas() {
+  var rows = [];
+  REGUAS_PADRAO.forEach(function (bloco) {
+    bloco.perguntas.forEach(function (p, i) {
+      rows.push({ assunto: bloco.assunto, ordem: i + 1, pergunta: p.pergunta, opcoes: p.opcoes || null, ativo: true });
+    });
+  });
+  var r = await sb().from('reguas').insert(rows);
+  if (r.error) throw r.error;
+}
 
 // ---------- Estado ----------
 var LEADS = [];
 var LEADS_BY_ID = {};
 var GASTOS = {};            // { 'AAAA-MM': {google, meta} }
+var REGUAS = [];            // linhas da tabela reguas
 var DASH_MES = monthKey(new Date());   // mês selecionado no dashboard
 var CURRENT_VIEW = 'board';
 
@@ -274,7 +359,7 @@ function toast(msg) {
 // ---------- Abas ----------
 function switchView(view) {
   CURRENT_VIEW = view;
-  ['board', 'dash', 'clients'].forEach(function (v) {
+  ['board', 'dash', 'clients', 'reguas'].forEach(function (v) {
     el(v + '-view').hidden = (v !== view);
   });
   Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
@@ -282,6 +367,7 @@ function switchView(view) {
   });
   if (view === 'dash') renderDash();
   if (view === 'clients') renderClients();
+  if (view === 'reguas') renderReguas();
 }
 
 // ---------- Dashboard (Resultados) ----------
@@ -548,6 +634,163 @@ function renderClientsTable() {
   });
 }
 
+// ---------- Réguas (perguntas do bot, editáveis) ----------
+function reguasDoAssunto(assunto) {
+  return REGUAS.filter(function (r) { return r.assunto === assunto; })
+    .sort(function (a, b) { return a.ordem - b.ordem; });
+}
+
+function renderReguas() {
+  var view = el('reguas-view');
+
+  if (!REGUAS.length) {
+    view.innerHTML = '' +
+      '<div class="dash-head"><h2>Réguas do bot</h2></div>' +
+      '<section class="panel">' +
+        '<p>Estas são as <strong>perguntas que o bot do WhatsApp vai fazer</strong> em cada assunto. ' +
+        'A Claudinha escreve e mantém; você pode editar, adicionar ou remover aqui quando quiser — é a sua segurança.</p>' +
+        '<p class="muted small">Ainda não há réguas carregadas. Clique abaixo pra trazer as 6 réguas padrão do Caio (você edita depois).</p>' +
+        '<button id="seed-reguas" class="btn btn-primary" style="width:auto">Carregar réguas padrão do Caio</button>' +
+      '</section>';
+    el('seed-reguas').addEventListener('click', onSeedReguas);
+    return;
+  }
+
+  var aberturaHTML = REGUA_ABERTURA.map(function (t, i) {
+    return '<li>' + (i + 1) + '. ' + esc(t) + '</li>';
+  }).join('');
+
+  var blocos = ASSUNTO_ORDER.map(function (assunto) {
+    var regs = reguasDoAssunto(assunto);
+    var linhas = regs.map(function (r, idx) {
+      return reguaRowHTML(r, idx, regs.length);
+    }).join('');
+    return '' +
+      '<section class="panel regua-bloco">' +
+        '<div class="regua-bloco-head">' +
+          '<h3>' + esc(ASSUNTO_LABEL[assunto] || assunto) + '</h3>' +
+          '<button class="btn btn-ghost regua-add" data-assunto="' + assunto + '">+ Adicionar pergunta</button>' +
+        '</div>' +
+        (linhas || '<p class="muted small">Sem perguntas nesse assunto.</p>') +
+      '</section>';
+  }).join('');
+
+  view.innerHTML = '' +
+    '<div class="dash-head"><h2>Réguas do bot</h2></div>' +
+    '<section class="panel regua-info">' +
+      '<p>Estas são as <strong>perguntas que o bot do WhatsApp vai fazer</strong>. A Claudinha escreve e mantém; ' +
+      'você edita, adiciona ou remove aqui quando quiser. <strong>Quando o bot estiver no ar (Bloco B), ele vai ler estas perguntas e perguntar exatamente o que estiver aqui.</strong></p>' +
+    '</section>' +
+
+    '<section class="panel regua-ref">' +
+      '<h3>Abertura <span class="regua-tagref">igual em todos</span></h3>' +
+      '<ul class="regua-ref-list">' + aberturaHTML + '</ul>' +
+    '</section>' +
+
+    blocos +
+
+    '<section class="panel regua-ref">' +
+      '<h3>Encaminhamento pra consulta <span class="regua-tagref">lógica no bot</span></h3>' +
+      '<p class="muted small">' + esc(REGUA_BLOCO_B) + '</p>' +
+    '</section>';
+
+  wireReguas();
+}
+
+function reguaRowHTML(r, idx, total) {
+  return '' +
+    '<div class="regua-row" data-id="' + esc(r.id) + '">' +
+      '<div class="regua-num">' + (idx + 1) + '</div>' +
+      '<div class="regua-fields">' +
+        '<textarea class="regua-pergunta" rows="2" placeholder="Pergunta que o bot faz…">' + esc(r.pergunta) + '</textarea>' +
+        '<textarea class="regua-opcoes" rows="2" placeholder="Opções de resposta (uma por linha) — deixe vazio se for pergunta aberta">' + esc(r.opcoes || '') + '</textarea>' +
+      '</div>' +
+      '<div class="regua-acts">' +
+        '<button class="icon-btn regua-save" title="Salvar">Salvar</button>' +
+        '<button class="icon-btn regua-up" title="Subir"' + (idx === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button class="icon-btn regua-down" title="Descer"' + (idx === total - 1 ? ' disabled' : '') + '>↓</button>' +
+        '<button class="icon-btn icon-btn--danger regua-del" title="Remover">Remover</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function wireReguas() {
+  Array.prototype.forEach.call(document.querySelectorAll('.regua-add'), function (b) {
+    b.addEventListener('click', function () { addReguaPergunta(b.getAttribute('data-assunto')); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.regua-row'), function (rowEl) {
+    var id = rowEl.getAttribute('data-id');
+    rowEl.querySelector('.regua-save').addEventListener('click', function () { saveReguaRow(id, rowEl); });
+    rowEl.querySelector('.regua-del').addEventListener('click', function () { delReguaRow(id); });
+    rowEl.querySelector('.regua-up').addEventListener('click', function () { moveRegua(id, -1); });
+    rowEl.querySelector('.regua-down').addEventListener('click', function () { moveRegua(id, +1); });
+  });
+}
+
+async function onSeedReguas() {
+  var btn = el('seed-reguas'); btn.disabled = true; btn.textContent = 'Carregando…';
+  try {
+    await seedReguas();
+    REGUAS = await fetchReguas();
+    toast('Réguas padrão carregadas.');
+    renderReguas();
+  } catch (err) {
+    toast('Não consegui carregar: ' + (err.message || err));
+    console.error(err);
+    btn.disabled = false; btn.textContent = 'Carregar réguas padrão do Caio';
+  }
+}
+
+async function addReguaPergunta(assunto) {
+  var regs = reguasDoAssunto(assunto);
+  var ordem = regs.length ? regs[regs.length - 1].ordem + 1 : 1;
+  try {
+    var nova = await insertRegua({ assunto: assunto, ordem: ordem, pergunta: 'Nova pergunta', opcoes: null, ativo: true });
+    if (nova) REGUAS.push(nova);
+    renderReguas();
+    toast('Pergunta adicionada em ' + (ASSUNTO_LABEL[assunto] || assunto) + '.');
+  } catch (err) { toast('Não consegui adicionar: ' + (err.message || err)); console.error(err); }
+}
+
+async function saveReguaRow(id, rowEl) {
+  var pergunta = rowEl.querySelector('.regua-pergunta').value.trim();
+  var opcoes = rowEl.querySelector('.regua-opcoes').value.trim();
+  if (!pergunta) { toast('A pergunta não pode ficar vazia.'); return; }
+  var btn = rowEl.querySelector('.regua-save'); btn.disabled = true; btn.textContent = '…';
+  try {
+    await updateRegua(id, { pergunta: pergunta, opcoes: opcoes || null });
+    var reg = REGUAS.find(function (r) { return r.id === id; });
+    if (reg) { reg.pergunta = pergunta; reg.opcoes = opcoes || null; }
+    toast('Pergunta salva.');
+  } catch (err) { toast('Não consegui salvar: ' + (err.message || err)); console.error(err); }
+  finally { btn.disabled = false; btn.textContent = 'Salvar'; }
+}
+
+async function delReguaRow(id) {
+  try {
+    await deleteRegua(id);
+    REGUAS = REGUAS.filter(function (r) { return r.id !== id; });
+    renderReguas();
+    toast('Pergunta removida.');
+  } catch (err) { toast('Não consegui remover: ' + (err.message || err)); console.error(err); }
+}
+
+async function moveRegua(id, dir) {
+  var reg = REGUAS.find(function (r) { return r.id === id; });
+  if (!reg) return;
+  var regs = reguasDoAssunto(reg.assunto);
+  var i = regs.findIndex(function (r) { return r.id === id; });
+  var j = i + dir;
+  if (j < 0 || j >= regs.length) return;
+  var a = regs[i], b = regs[j];
+  var ao = a.ordem, bo = b.ordem;
+  try {
+    await Promise.all([updateRegua(a.id, { ordem: bo }), updateRegua(b.id, { ordem: ao })]);
+    a.ordem = bo; b.ordem = ao;
+    renderReguas();
+  } catch (err) { toast('Não consegui reordenar: ' + (err.message || err)); console.error(err); }
+}
+
 // ---------- Carregamento ----------
 async function loadAndRender() {
   toast('Carregando…');
@@ -565,9 +808,18 @@ async function loadAndRender() {
       console.warn('Tabela de gastos ainda não disponível (rode add-gastos-mensais.sql):', gErr.message || gErr);
     }
 
+    // Réguas também é opcional até a tabela existir.
+    REGUAS = [];
+    try {
+      REGUAS = await fetchReguas();
+    } catch (rErr) {
+      console.warn('Tabela de réguas ainda não disponível (rode add-reguas.sql):', rErr.message || rErr);
+    }
+
     renderBoard();
     if (CURRENT_VIEW === 'dash') renderDash();
     if (CURRENT_VIEW === 'clients') renderClients();
+    if (CURRENT_VIEW === 'reguas') renderReguas();
     toast(LEADS.length ? 'Pronto.' : 'Nenhum lead ainda.');
   } catch (err) {
     toast('Erro ao carregar: ' + (err.message || err));

@@ -295,3 +295,42 @@ button { font-family: inherit; cursor: pointer; }
   .regua-acts { flex-direction: row; width: 100%; }
   .icon-btn { flex: 1; }
 }
+
+/* ========== Mobile (celular) ========== */
+@media (max-width: 560px) {
+  /* Topbar compacto — botões cabem, nada corta */
+  .topbar { padding: 9px 12px; gap: 8px; }
+  .brand { gap: 9px; }
+  .brand-mark { width: 38px; height: 38px; }
+  .brand-text strong { font-size: 14.5px; }
+  .brand-text span { font-size: 10px; }
+  .topbar-actions { gap: 6px; }
+  .lead-count { display: none; }            /* o número aparece no dashboard */
+  .btn-ghost { padding: 7px 9px; font-size: 12.5px; }
+
+  /* Abas roláveis, sem estourar */
+  .tabs { padding: 0 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 12px 12px; font-size: 13.5px; white-space: nowrap; flex: none; }
+
+  /* Mural: cada coluna ocupa quase a tela (foca num estágio por vez) */
+  .board { padding: 14px 12px 22px; gap: 12px; height: calc(100vh - 104px); }
+  .col { flex: 0 0 85vw; }
+
+  /* Abas de conteúdo com menos respiro lateral */
+  .view { padding: 16px 12px; }
+  .dash-head h2 { font-size: 18px; }
+  .stat-num { font-size: 22px; }
+  #gasto-save { width: 100%; }
+
+  /* Réguas: cabeçalho e corpo mais justos */
+  .regua-bloco-head { padding: 14px 14px; }
+  .regua-bloco-body { padding: 8px 14px 16px; }
+
+  /* Modal ocupa quase a tela */
+  .modal-card { width: 94vw; padding: 20px 18px 18px; }
+  .detail-row dt { flex: 0 0 110px; }
+
+  /* Tabela de clientes: rola na horizontal dentro do próprio quadro */
+  .cli-tbl { min-width: 560px; }
+}

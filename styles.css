@@ -299,9 +299,10 @@ button { font-family: inherit; cursor: pointer; }
 /* ========== Mobile (celular) ========== */
 @media (max-width: 560px) {
   /* Topbar compacto — botões cabem, nada corta */
-  .topbar { padding: 9px 12px; gap: 8px; }
-  .brand { gap: 9px; min-width: 0; }
+  .topbar { padding: 9px 12px; gap: 8px; flex-wrap: wrap; }
+  .brand { gap: 9px; min-width: 0; flex: 1 1 60%; }
   .brand-mark { flex: none; }
+  .topbar-actions { flex: 0 0 auto; margin-left: auto; }
   .brand-mark { width: 38px; height: 38px; }
   .brand-text strong { font-size: 14.5px; }
   .brand-text span { font-size: 10px; }

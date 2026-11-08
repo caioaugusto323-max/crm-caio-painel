@@ -299,6 +299,51 @@ function byOrigem(leads) {
   return out;
 }
 
+// Meses com dados (leads ou gasto), ordenados, últimos N — pro gráfico de evolução.
+function monthsWithData(n) {
+  var set = {};
+  LEADS.forEach(function (l) { var m = leadMonth(l); if (m) set[m] = true; });
+  Object.keys(GASTOS).forEach(function (m) { set[m] = true; });
+  var keys = Object.keys(set).sort();
+  if (keys.length > n) keys = keys.slice(keys.length - n);
+  return keys.map(function (mk) {
+    return { mk: mk, leads: leadsOfMonth(mk).length, gasto: gastoOfMonth(mk).total };
+  });
+}
+
+function buildEvoHTML() {
+  var meses = monthsWithData(6);
+  if (!meses.length) {
+    return '<section class="panel"><h3>Gasto × leads por mês</h3>' +
+      '<p class="muted">Ainda não há meses com dados. Conforme os leads entram e você registra o gasto, a evolução aparece aqui.</p></section>';
+  }
+  var maxGasto = meses.reduce(function (m, x) { return Math.max(m, x.gasto); }, 0) || 1;
+  var maxLeads = meses.reduce(function (m, x) { return Math.max(m, x.leads); }, 0) || 1;
+  var H = 120;
+  var cols = meses.map(function (x) {
+    var hg = x.gasto > 0 ? Math.max(4, Math.round(x.gasto / maxGasto * H)) : 0;
+    var hl = x.leads > 0 ? Math.max(4, Math.round(x.leads / maxLeads * H)) : 0;
+    return '<div class="evo-col">' +
+      '<div class="evo-bars" style="height:' + H + 'px">' +
+        '<div class="evo-bar evo-bar--gasto" style="height:' + hg + 'px" title="Gasto: ' + esc(brl(x.gasto)) + '">' +
+          (x.gasto > 0 ? '<span class="evo-v">' + esc(brl(x.gasto)) + '</span>' : '') + '</div>' +
+        '<div class="evo-bar evo-bar--leads" style="height:' + hl + 'px" title="' + x.leads + ' leads">' +
+          (x.leads > 0 ? '<span class="evo-v">' + x.leads + '</span>' : '') + '</div>' +
+      '</div>' +
+      '<span class="evo-mes">' + esc(monthLabel(x.mk)) + '</span>' +
+    '</div>';
+  }).join('');
+  return '<section class="panel panel--evo">' +
+    '<div class="evo-head"><h3>Gasto × leads por mês</h3>' +
+      '<div class="evo-legend">' +
+        '<span><i class="evo-dot evo-dot--gasto"></i>Gasto (R$)</span>' +
+        '<span><i class="evo-dot evo-dot--leads"></i>Leads</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="evo-chart">' + cols + '</div>' +
+  '</section>';
+}
+
 function statTile(valor, rotulo, hint) {
   return '<div class="stat">' +
     '<span class="stat-num">' + valor + '</span>' +
@@ -399,6 +444,8 @@ function renderDash() {
       statTile(brl(g.total), 'gasto no mês', 'Google + Meta') +
       statTile(String(pagas), 'consultas pagas / fechadas') +
     '</div>' +
+
+    buildEvoHTML() +
 
     '<div class="dash-grid">' +
       '<section class="panel">' +

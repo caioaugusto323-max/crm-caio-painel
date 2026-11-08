@@ -200,6 +200,24 @@ button { font-family: inherit; cursor: pointer; }
 .bar-fill { display: block; height: 100%; background: var(--accent); border-radius: 6px; }
 .bar-val { font-size: 13px; font-weight: 700; color: var(--ink); text-align: right; }
 
+/* Gráfico evolução (gasto × leads) */
+.panel--evo { margin-bottom: 16px; }
+.evo-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.evo-head h3 { margin: 0; }
+.evo-legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+.evo-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.evo-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.evo-dot--gasto { background: var(--accent); }
+.evo-dot--leads { background: var(--ink); }
+.evo-chart { display: flex; gap: 18px; align-items: flex-end; overflow-x: auto; padding-top: 18px; }
+.evo-col { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 64px; }
+.evo-bars { display: flex; align-items: flex-end; gap: 6px; }
+.evo-bar { width: 22px; border-radius: 5px 5px 0 0; position: relative; display: flex; justify-content: center; }
+.evo-bar--gasto { background: var(--accent); }
+.evo-bar--leads { background: var(--ink); }
+.evo-v { position: absolute; top: -17px; font-size: 10.5px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
+.evo-mes { font-size: 12px; color: var(--muted); }
+
 /* Análise */
 .panel--analise { margin-bottom: 0; }
 .notas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }

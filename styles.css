@@ -250,10 +250,20 @@ button { font-family: inherit; cursor: pointer; }
 .regua-tagref { font-size: 11px; font-weight: 600; color: var(--accent-dark); background: rgba(166,124,82,.14); border: 1px solid var(--line); padding: 2px 8px; border-radius: 20px; }
 .regua-ref-list { margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 13.5px; line-height: 1.6; }
 
-.regua-bloco { margin-bottom: 16px; }
-.regua-bloco-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-.regua-bloco-head h3 { margin: 0; font-size: 15px; color: var(--ink); }
-.regua-add { padding: 7px 12px; font-size: 13px; }
+.regua-bloco { margin-bottom: 10px; padding: 0; overflow: hidden; }
+.regua-bloco-head {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: transparent; border: none; text-align: left;
+  padding: 16px 20px; cursor: pointer;
+}
+.regua-bloco-head:hover { background: var(--bg); }
+.regua-bloco.is-open .regua-bloco-head { border-bottom: 1px solid var(--line); }
+.regua-chev { color: var(--accent); font-size: 13px; width: 14px; flex: none; }
+.regua-bloco-title { font-size: 15px; font-weight: 700; color: var(--ink); flex: 1; }
+.regua-count { font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--line); padding: 2px 10px; border-radius: 20px; flex: none; }
+.regua-bloco.is-open .regua-count { background: var(--panel); }
+.regua-bloco-body { padding: 8px 20px 18px; }
+.regua-add { padding: 7px 12px; font-size: 13px; margin-top: 12px; }
 
 .regua-row { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); }
 .regua-row:first-of-type { border-top: none; }

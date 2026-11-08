@@ -184,6 +184,7 @@ var LEADS = [];
 var LEADS_BY_ID = {};
 var GASTOS = {};            // { 'AAAA-MM': {google, meta} }
 var REGUAS = [];            // linhas da tabela reguas
+var REGUA_OPEN = {};        // qual assunto está aberto na sanfona
 var DASH_MES = monthKey(new Date());   // mês selecionado no dashboard
 var CURRENT_VIEW = 'board';
 
@@ -662,16 +663,22 @@ function renderReguas() {
 
   var blocos = ASSUNTO_ORDER.map(function (assunto) {
     var regs = reguasDoAssunto(assunto);
+    var open = !!REGUA_OPEN[assunto];
+    var n = regs.length;
     var linhas = regs.map(function (r, idx) {
-      return reguaRowHTML(r, idx, regs.length);
+      return reguaRowHTML(r, idx, n);
     }).join('');
     return '' +
-      '<section class="panel regua-bloco">' +
-        '<div class="regua-bloco-head">' +
-          '<h3>' + esc(ASSUNTO_LABEL[assunto] || assunto) + '</h3>' +
+      '<section class="panel regua-bloco' + (open ? ' is-open' : '') + '">' +
+        '<button class="regua-bloco-head" data-assunto="' + assunto + '" aria-expanded="' + open + '">' +
+          '<span class="regua-chev">' + (open ? '▾' : '▸') + '</span>' +
+          '<span class="regua-bloco-title">' + esc(ASSUNTO_LABEL[assunto] || assunto) + '</span>' +
+          '<span class="regua-count">' + n + (n === 1 ? ' pergunta' : ' perguntas') + '</span>' +
+        '</button>' +
+        '<div class="regua-bloco-body"' + (open ? '' : ' hidden') + '>' +
+          (linhas || '<p class="muted small">Sem perguntas nesse assunto.</p>') +
           '<button class="btn btn-ghost regua-add" data-assunto="' + assunto + '">+ Adicionar pergunta</button>' +
         '</div>' +
-        (linhas || '<p class="muted small">Sem perguntas nesse assunto.</p>') +
       '</section>';
   }).join('');
 
@@ -715,6 +722,13 @@ function reguaRowHTML(r, idx, total) {
 }
 
 function wireReguas() {
+  Array.prototype.forEach.call(document.querySelectorAll('.regua-bloco-head'), function (h) {
+    h.addEventListener('click', function () {
+      var a = h.getAttribute('data-assunto');
+      REGUA_OPEN[a] = !REGUA_OPEN[a];
+      renderReguas();
+    });
+  });
   Array.prototype.forEach.call(document.querySelectorAll('.regua-add'), function (b) {
     b.addEventListener('click', function () { addReguaPergunta(b.getAttribute('data-assunto')); });
   });
@@ -747,6 +761,7 @@ async function addReguaPergunta(assunto) {
   try {
     var nova = await insertRegua({ assunto: assunto, ordem: ordem, pergunta: 'Nova pergunta', opcoes: null, ativo: true });
     if (nova) REGUAS.push(nova);
+    REGUA_OPEN[assunto] = true;
     renderReguas();
     toast('Pergunta adicionada em ' + (ASSUNTO_LABEL[assunto] || assunto) + '.');
   } catch (err) { toast('Não consegui adicionar: ' + (err.message || err)); console.error(err); }

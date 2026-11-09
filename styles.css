@@ -298,20 +298,17 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ========== Mobile (celular) ========== */
 @media (max-width: 560px) {
-  /* Topbar compacto — botões cabem, nada corta */
-  .topbar { padding: 9px 12px; gap: 8px; flex-wrap: wrap; }
-  .brand { gap: 9px; min-width: 0; flex: 1 1 60%; }
-  .brand-mark { flex: none; }
-  .topbar-actions { flex: 0 0 auto; margin-left: auto; }
-  .brand-mark { width: 38px; height: 38px; }
-  .brand-text strong { font-size: 14.5px; }
-  .brand-text span { font-size: 10px; }
-  .topbar-actions { gap: 6px; flex: none; }
-  .lead-count { display: none; }            /* o número aparece no dashboard */
-  .btn-ghost { padding: 7px 10px; font-size: 13px; }
-  .btn-label { display: none; }             /* "Atualizar" vira só o ícone ↻ */
+  /* Topbar compacto e robusto: marca encolhe (nome trunca), botões fixos à direita */
+  .topbar { padding: 9px 12px; gap: 8px; flex-wrap: nowrap; }
+  .brand { gap: 9px; min-width: 0; flex: 1 1 auto; overflow: hidden; }
+  .brand-mark { flex: none; width: 38px; height: 38px; }
   .brand-text { min-width: 0; }
-  .brand-text strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-text strong { font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-text span { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-actions { flex: none; gap: 6px; }
+  .lead-count { display: none; }            /* o número aparece no dashboard */
+  .btn-ghost { padding: 7px 10px; font-size: 13px; white-space: nowrap; }
+  .btn-label { display: none; }             /* "Atualizar" vira só o ícone ↻ */
 
   /* Abas roláveis, sem estourar */
   .tabs { padding: 0 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }

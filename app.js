@@ -48,13 +48,14 @@ var REGUAS_PADRAO = [
     { pergunta: 'Vocês dois estão de acordo com a separação?', opcoes: 'Sim\nAinda não' },
     { pergunta: 'Tem filhos menores de idade?', opcoes: 'Sim\nNão' },
     { pergunta: 'Há gravidez no momento?', opcoes: 'Sim\nNão' },
-    { pergunta: 'Em uma frase, como posso te ajudar? (sem detalhes do caso)' }
+    { pergunta: 'Em algumas palavras, explique sua situação para que o Dr. Caio possa analisar.', tipo: 'descricao' }
   ]},
   { assunto: 'guarda', perguntas: [
     { pergunta: 'Nome e cidade de onde está falando; idade da criança envolvida.' },
     { pergunta: 'Atualmente, como está a rotina de convivência e com quem a criança está morando?', opcoes: 'Morando comigo\nMorando com o outro genitor\nGuarda já fixada por juiz (precisa de alteração)\nSem acordo formal (situação informal)' },
     { pergunta: 'Já existe processo judicial em andamento sobre a guarda/pensão dessa criança, ou será a primeira vez na Justiça?' },
-    { pergunta: 'Existe possibilidade de acordo amigável entre os pais, ou a situação exige ação judicial (sem consenso)?' }
+    { pergunta: 'Existe possibilidade de acordo amigável entre os pais, ou a situação exige ação judicial (sem consenso)?' },
+    { pergunta: 'Em algumas palavras, explique sua situação para que o Dr. Caio possa analisar.', tipo: 'descricao' }
   ]},
   { assunto: 'pensao', perguntas: [
     { pergunta: 'Nome e cidade de onde está falando.' },
@@ -62,7 +63,8 @@ var REGUAS_PADRAO = [
     { pergunta: 'A pensão é destinada a quantos filhos (ou dependentes) e qual a idade deles?' },
     { pergunta: 'Quem deve pagar possui trabalho formal ou autônomo/informal?', opcoes: 'Carteira assinada / Servidor\nAutônomo / Empresário\nDesempregado / Sem renda formal\nNão tenho certeza' },
     { pergunta: 'Já existe acordo fixando o valor (Justiça ou papel), ou era tudo "de boca"?' },
-    { pergunta: 'No momento, algum valor está sendo pago espontaneamente ou o pagamento foi interrompido totalmente?' }
+    { pergunta: 'No momento, algum valor está sendo pago espontaneamente ou o pagamento foi interrompido totalmente?' },
+    { pergunta: 'Em algumas palavras, explique sua situação para que o Dr. Caio possa analisar.', tipo: 'descricao' }
   ]},
   { assunto: 'inventario', perguntas: [
     { pergunta: 'Nome e cidade de onde está falando.' },
@@ -70,7 +72,8 @@ var REGUAS_PADRAO = [
     { pergunta: 'Há quanto tempo ocorreu o falecimento?', opcoes: 'Menos de 60 dias\nEntre 2 e 6 meses\nMais de 6 meses\nMais de 1 ano' },
     { pergunta: 'Existe herdeiro menor de 18 anos, incapaz, ou testamento?', opcoes: 'Todos maiores, capazes e sem testamento\nSim, há menor ou incapaz\nSim, existe testamento\nNão tenho certeza' },
     { pergunta: 'Todos os herdeiros estão de acordo sobre a divisão, ou há conflito?', opcoes: 'Todos de acordo (Consensual)\nHá divergências (Litigioso)\nAinda não conversamos sobre isso' },
-    { pergunta: 'O patrimônio é composto por quais tipos de bens?', opcoes: 'Imóveis\nVeículos\nSaldos/Investimentos\nEmpresas/Quotas\nSem bens a partilhar' }
+    { pergunta: 'O patrimônio é composto por quais tipos de bens?', opcoes: 'Imóveis\nVeículos\nSaldos/Investimentos\nEmpresas/Quotas\nSem bens a partilhar' },
+    { pergunta: 'Em algumas palavras, explique sua situação para que o Dr. Caio possa analisar.', tipo: 'descricao' }
   ]},
   { assunto: 'imovel', perguntas: [
     { pergunta: 'Nome e cidade de onde está falando.' },
@@ -78,7 +81,8 @@ var REGUAS_PADRAO = [
     { pergunta: 'Você é o proprietário registrado, posseiro/morador, locador (dono que aluga) ou inquilino?' },
     { pergunta: 'O imóvel tem matrícula/registro definitivo no seu nome, ou só contrato de gaveta/promessa?', opcoes: 'Tem Matrícula / Registro definitivo\nApenas Contrato de Gaveta / Recibo\nNão tem documento (apenas posse de fato)\nNão sei informar' },
     { pergunta: '(Se usucapião/posse) Há quanto tempo você/sua família está na posse de forma contínua?', opcoes: 'Menos de 5 anos\nEntre 5 e 10 anos\nMais de 10 ou 15 anos\nNão se aplica' },
-    { pergunta: 'Existe risco de perda do imóvel agora (despejo, leilão, ameaça de invasão, notificação com prazo a vencer)?' }
+    { pergunta: 'Existe risco de perda do imóvel agora (despejo, leilão, ameaça de invasão, notificação com prazo a vencer)?' },
+    { pergunta: 'Em algumas palavras, explique sua situação para que o Dr. Caio possa analisar.', tipo: 'descricao' }
   ]},
   { assunto: 'outros', perguntas: [
     { pergunta: 'Nome e cidade de onde está falando.' },
@@ -172,7 +176,7 @@ async function seedReguas() {
   var rows = [];
   REGUAS_PADRAO.forEach(function (bloco) {
     bloco.perguntas.forEach(function (p, i) {
-      rows.push({ assunto: bloco.assunto, ordem: i + 1, pergunta: p.pergunta, opcoes: p.opcoes || null, ativo: true });
+      rows.push({ assunto: bloco.assunto, ordem: i + 1, pergunta: p.pergunta, opcoes: p.opcoes || null, ativo: true, tipo: p.tipo || 'triagem' });
     });
   });
   var r = await sb().from('reguas').insert(rows);
@@ -318,6 +322,10 @@ function respostasHTML(arr) {
   }).join('');
   return '<div class="detail-section"><h3>Respostas da triagem</h3><ul class="rsp-list">' + items + '</ul></div>';
 }
+function descricaoCasoHTML(texto) {
+  if (!texto) return '';
+  return '<div class="detail-section"><h3>Descrição do caso</h3><p>' + esc(texto) + '</p></div>';
+}
 function openModal(id) {
   var l = LEADS_BY_ID[id];
   if (!l) return;
@@ -342,6 +350,7 @@ function openModal(id) {
     row('E-mail', esc(l.email || '')) +
     row('Contato preferido', esc(label(CONTATO_LABEL, l.preferencia_contato) || '')) +
     row('Consulta', l.data_consulta ? fmtDateTime(l.data_consulta) : '') +
+    descricaoCasoHTML(l.descricao_caso) +
     respostasHTML(l.respostas);
   el('modal-body').innerHTML = body || '<p>Sem dados.</p>';
   el('modal').hidden = false;
@@ -705,10 +714,14 @@ function renderReguas() {
 }
 
 function reguaRowHTML(r, idx, total) {
+  var badge = r.tipo === 'descricao'
+    ? '<span class="regua-tagref" title="A resposta vira um campo próprio na ficha do lead (Descrição do caso), não entra na lista de respostas.">📝 campo de descrição</span>'
+    : '';
   return '' +
     '<div class="regua-row" data-id="' + esc(r.id) + '">' +
       '<div class="regua-num">' + (idx + 1) + '</div>' +
       '<div class="regua-fields">' +
+        (badge ? '<div>' + badge + '</div>' : '') +
         '<textarea class="regua-pergunta" rows="2" placeholder="Pergunta que o bot faz…">' + esc(r.pergunta) + '</textarea>' +
         '<textarea class="regua-opcoes" rows="2" placeholder="Opções de resposta (uma por linha) — deixe vazio se for pergunta aberta">' + esc(r.opcoes || '') + '</textarea>' +
       '</div>' +

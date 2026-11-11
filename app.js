@@ -10,15 +10,29 @@
 var STAGES = [
   { key: 'novo',                 label: 'Novo',                 dot: '#7a7266' },
   { key: 'qualificado',          label: 'Qualificado',          dot: '#3b5668' },
-  { key: 'aguardando_decisao',   label: 'Aguardando decisão',   dot: '#a67c52' },
   { key: 'aguardando_pagamento', label: 'Aguardando pagamento', dot: '#c99a3f' },
   { key: 'consulta_paga',        label: 'Consulta paga',        dot: '#3f7d58' },
   { key: 'consulta_agendada',    label: 'Consulta agendada',    dot: '#2f6e8f' },
+  { key: 'reagendar_manual',     label: 'Reagendar manualmente', dot: '#c2703e' },
   { key: 'outros_repasse',       label: 'Outros · repasse',     dot: '#8a5a8f' },
   { key: 'cliente_fechado',      label: 'Cliente fechado',      dot: '#2e5d43' },
-  { key: 'perdido',              label: 'Perdido / sem retorno', dot: '#b4452f' }
+  { key: 'nao_seguiu',           label: 'Não seguiu em frente', dot: '#b4452f' }
 ];
 var STAGE_KEYS = STAGES.map(function (s) { return s.key; });
+
+// Estágios que o bot ainda grava com o valor específico (pra manter o motivo
+// na ficha do lead), mas que aparecem juntos numa única coluna no Mural:
+// disse não, disse "vou pensar" e desistiu em silêncio (cron de 24h).
+var STAGE_GROUP = {
+  sem_disposicao: 'nao_seguiu',
+  aguardando_decisao: 'nao_seguiu',
+  perdido: 'nao_seguiu',
+};
+var SUBLABEL = {
+  sem_disposicao: 'Sem disposição',
+  aguardando_decisao: 'Aguardando decisão',
+  perdido: 'Perdido / sem retorno',
+};
 
 var ORIGEM_LABEL = { instagram: 'Instagram', indicacao: 'Indicação', google: 'Google', outro: 'Outro' };
 var PROC_LABEL = {
@@ -225,6 +239,12 @@ function cardHTML(lead) {
   if (lead.estagio === 'consulta_agendada' && lead.data_consulta) {
     tags.push('<span class="tag tag--proc">consulta ' + fmtDate(lead.data_consulta) + '</span>');
   }
+  if (lead.horario_sugerido && lead.estagio !== 'consulta_agendada') {
+    tags.push('<span class="tag tag--alert">reagendar: ' + esc(lead.horario_sugerido) + '</span>');
+  }
+  if (SUBLABEL[lead.estagio]) {
+    tags.push('<span class="tag tag--alert">' + esc(SUBLABEL[lead.estagio]) + '</span>');
+  }
 
   var phrase = lead.frase ? '<p class="card-phrase">' + esc(lead.frase) + '</p>' : '';
   return '' +
@@ -242,8 +262,9 @@ function renderBoard() {
   STAGE_KEYS.forEach(function (k) { buckets[k] = []; });
   var orphans = 0;
   LEADS.forEach(function (lead) {
-    var k = buckets[lead.estagio] ? lead.estagio : 'novo';
-    if (!buckets[lead.estagio]) orphans++;
+    var real = STAGE_GROUP[lead.estagio] || lead.estagio;
+    var k = buckets[real] ? real : 'novo';
+    if (!buckets[real]) orphans++;
     buckets[k].push(lead);
   });
   if (orphans) console.warn(orphans + ' lead(s) com estágio fora da lista caíram em "Novo".');
@@ -311,7 +332,10 @@ async function moveLead(id, newStage) {
     toast('Não consegui mover: ' + (err.message || err));
   }
 }
-function stageLabel(k) { var s = STAGES.find(function (x) { return x.key === k; }); return s ? s.label : k; }
+function stageLabel(k) {
+  var s = STAGES.find(function (x) { return x.key === k; });
+  return s ? s.label : (SUBLABEL[k] || k);
+}
 
 // ---------- Modal detalhe ----------
 function row(dt, dd) { return dd ? '<div class="detail-row"><dt>' + esc(dt) + '</dt><dd>' + dd + '</dd></div>' : ''; }
@@ -350,6 +374,7 @@ function openModal(id) {
     row('E-mail', esc(l.email || '')) +
     row('Contato preferido', esc(label(CONTATO_LABEL, l.preferencia_contato) || '')) +
     row('Consulta', l.data_consulta ? fmtDateTime(l.data_consulta) : '') +
+    row('Horário sugerido (não conseguiu agendar)', esc(l.horario_sugerido || '')) +
     descricaoCasoHTML(l.descricao_caso) +
     respostasHTML(l.respostas);
   el('modal-body').innerHTML = body || '<p>Sem dados.</p>';
@@ -615,7 +640,7 @@ function renderClientsTable() {
   var fe = el('cli-estagio').value;
   var fo = el('cli-origem').value;
   var rows = LEADS.filter(function (l) {
-    if (fe && l.estagio !== fe) return false;
+    if (fe && (STAGE_GROUP[l.estagio] || l.estagio) !== fe) return false;
     if (fo && l.origem !== fo) return false;
     if (q) {
       var hay = ((l.nome || '') + ' ' + (l.telefone || '')).toLowerCase();

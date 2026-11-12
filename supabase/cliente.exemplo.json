@@ -1,0 +1,10 @@
+{
+  "_comando": "Copie este arquivo para cliente.json, preencha e rode: node supabase/provisionar-cliente.mjs supabase/cliente.json",
+
+  "nome": "crm-escritorio-silva",
+  "regiao": "sa-east-1",
+  "loginEmail": "contato@escritoriosilva.com.br",
+  "loginSenha": "troque-por-uma-senha-forte",
+
+  "_opcional_orgId": "deixe de fora pra usar a organização padrão da conta; preencha só se a conta tiver mais de uma"
+}

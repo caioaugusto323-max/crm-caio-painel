@@ -4,3 +4,12 @@
 node_modules/
 .DS_Store
 *.log
+
+# Provisionamento white label — NUNCA versionar (contêm segredos):
+# dados + senha de acesso de um cliente
+supabase/cliente.json
+# config gerado por cliente (config.<nome>.js)
+config.*.js
+# menos o modelo público e a config.js do Caio (config.js não casa com config.*.js)
+!config.example.js
+.env

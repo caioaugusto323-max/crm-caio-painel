@@ -82,19 +82,38 @@ Enquanto o passo 1 não acontecer, **não** torne o bucket privado.
 
 ---
 
-## 6. Automação total (pra não fazer nada na unha)
+## 6. Automação total — o atalho (JÁ MONTADO)
 
-Os 3 passos de painel da seção 3b podem virar **um comando**, usando a
-**Management API** do Supabase (ou a CLI `supabase`). Um script de provisionamento faria:
-criar o projeto → rodar o `setup-seguro.sql` → desligar cadastro → criar o login →
-cuspir o `config.js` pronto daquele cliente.
+Os passos todos (criar projeto → rodar `setup-seguro.sql` → desligar cadastro e
+anônimo → criar o login → gerar o `config.<nome>.js`) viraram **um comando**:
+`supabase/provisionar-cliente.mjs`.
 
-Para montar isso é preciso **um Access Token pessoal do Supabase** (gerado em
-Account → Access Tokens) e o ID da organização. Com isso guardado em segredo
-(fora do repositório), o onboarding de um cliente vira rodar um script.
+**Estratégia de conta:** uma **conta Supabase separada por cliente**. Como cada
+conta tem seu próprio plano grátis (até 2 projetos), 1 projeto por conta = **R$ 0
+de hospedagem por cliente**. O custo é só gerenciar um login Supabase por cliente.
 
-> Status: **ainda não montado.** Quando você quiser, a gente cria esse script —
-> é o passo que elimina de vez o trabalho manual.
+**Como rodar (por cliente):**
+1. Entrar na conta Supabase **daquele cliente**.
+2. Gerar um token: Account → Access Tokens → *Generate new token* (aparece uma vez — guarde).
+3. Preencher os dados: copiar `supabase/cliente.exemplo.json` → `supabase/cliente.json`
+   (nome do projeto, e-mail e senha de acesso do cliente). *Esse arquivo é gitignored.*
+4. Informar o token e rodar:
+   - Windows PowerShell:
+     ```
+     $env:SUPABASE_ACCESS_TOKEN="sbp_xxx"
+     node supabase/provisionar-cliente.mjs supabase/cliente.json
+     ```
+5. No fim, o atalho mostra a URL, o login criado, a **senha do banco** e a
+   **service_role** (guarde essas duas num lugar seguro) e grava `config.<nome>.js`.
+6. No deploy do painel daquele cliente, renomeie `config.<nome>.js` para `config.js`.
+
+> Segredos: `supabase/cliente.json`, `config.<nome>.js` e `.env` são **gitignored**
+> (nunca vão pro repositório). A **service_role** só entra no n8n daquele cliente,
+> nunca no painel.
+>
+> Status: **montado, falta o 1º teste real** — validamos juntas quando você criar
+> o primeiro cliente de verdade (cria um projeto Supabase real, mas no plano grátis,
+> sem custo).
 
 ---
 

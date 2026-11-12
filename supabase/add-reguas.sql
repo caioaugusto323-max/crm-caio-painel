@@ -10,9 +10,14 @@ create table if not exists public.reguas (
   ordem         int  not null default 0,
   pergunta      text not null,
   opcoes        text,                 -- opções de resposta (uma por linha); nulo = pergunta aberta
+  tipo          text not null default 'triagem',  -- 'triagem' | 'descricao' (resposta vira campo próprio na ficha)
   ativo         boolean not null default true,
   atualizado_em timestamptz not null default now()
 );
+
+-- Garante a coluna `tipo` mesmo se a tabela já existia sem ela (o seed do
+-- painel grava essa coluna — sem ela, "Carregar réguas padrão" quebra).
+alter table public.reguas add column if not exists tipo text not null default 'triagem';
 
 create index if not exists reguas_assunto_ordem on public.reguas (assunto, ordem);
 

@@ -109,6 +109,45 @@ var ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#3
 function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (c) { return ESC_MAP[c]; }); }
 function el(id) { return document.getElementById(id); }
 
+// URL segura pra usar em href: só aceita http(s). Bloqueia javascript:, data:,
+// etc. (esc escapa aspas, mas não impede o esquema javascript: executar).
+function safeUrl(u) {
+  u = (u == null ? '' : String(u)).trim();
+  return /^https?:\/\//i.test(u) ? u : null;
+}
+
+// Comprovantes ficam num bucket PRIVADO (dados sensíveis — LGPD). Em vez de link
+// público, geramos um link assinado temporário (1h) na hora de abrir. Aceita tanto
+// um caminho cru dentro do bucket quanto uma URL antiga do Storage (extrai o caminho).
+function comprovantePath(u) {
+  u = (u == null ? '' : String(u)).trim();
+  if (!u) return null;
+  var m = /\/storage\/v1\/object\/(?:public|sign|authenticated)\/comprovantes\/([^?]+)/.exec(u);
+  if (m) return decodeURIComponent(m[1]);
+  if (/^https?:\/\//i.test(u)) return null;      // URL externa desconhecida: não mexe
+  return u.replace(/^\/?comprovantes\//, '');    // já é um caminho dentro do bucket
+}
+async function abrirComprovante(u) {
+  var win = window.open('', '_blank');            // abre no gesto do clique (evita bloqueio de popup)
+  try {
+    var path = comprovantePath(u);
+    var url;
+    if (path) {
+      var r = await sb().storage.from('comprovantes').createSignedUrl(path, 3600);
+      if (r.error) throw r.error;
+      url = r.data.signedUrl;
+    } else {
+      url = safeUrl(u);                           // fallback: link http(s) externo válido
+    }
+    if (url && win) { win.opener = null; win.location = url; }
+    else { if (win) win.close(); toast('Comprovante indisponível.'); }
+  } catch (err) {
+    if (win) win.close();
+    toast('Não consegui abrir o comprovante: ' + (err.message || err));
+    console.error(err);
+  }
+}
+
 function fmtDate(iso) {
   if (!iso) return '—';
   // Datas puras (YYYY-MM-DD) viram meia-noite UTC no new Date() e "voltam um dia"
@@ -355,7 +394,7 @@ function openModal(id) {
   if (!l) return;
   el('modal-title').textContent = l.nome || 'Lead sem nome';
   var comp = l.comprovante_url
-    ? '<a href="' + esc(l.comprovante_url) + '" target="_blank" rel="noopener">ver comprovante</a>' : null;
+    ? '<button type="button" class="linklike" id="comp-open">ver comprovante</button>' : null;
   var body = '' +
     row('Estágio', esc(stageLabel(l.estagio))) +
     row('Assunto', esc(label(ASSUNTO_LABEL, l.assunto) || '')) +
@@ -378,6 +417,8 @@ function openModal(id) {
     descricaoCasoHTML(l.descricao_caso) +
     respostasHTML(l.respostas);
   el('modal-body').innerHTML = body || '<p>Sem dados.</p>';
+  var compBtn = el('comp-open');
+  if (compBtn) compBtn.addEventListener('click', function () { abrirComprovante(l.comprovante_url); });
   el('modal').hidden = false;
 }
 function closeModal() { el('modal').hidden = true; }
@@ -838,10 +879,18 @@ async function moveRegua(id, dir) {
   var a = regs[i], b = regs[j];
   var ao = a.ordem, bo = b.ordem;
   try {
-    await Promise.all([updateRegua(a.id, { ordem: bo }), updateRegua(b.id, { ordem: ao })]);
+    // Sequencial (não Promise.all): se a 2ª falhar, a 1ª já gravou e a gente
+    // ressincroniza com o banco pra tela não ficar inconsistente.
+    await updateRegua(a.id, { ordem: bo });
+    await updateRegua(b.id, { ordem: ao });
     a.ordem = bo; b.ordem = ao;
     renderReguas();
-  } catch (err) { toast('Não consegui reordenar: ' + (err.message || err)); console.error(err); }
+  } catch (err) {
+    try { REGUAS = await fetchReguas(); } catch (e) { /* mantém o que tem */ }
+    renderReguas();
+    toast('Não consegui reordenar: ' + (err.message || err));
+    console.error(err);
+  }
 }
 
 // ---------- Carregamento ----------

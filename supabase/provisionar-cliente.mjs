@@ -137,12 +137,17 @@ async function main() {
   if (!resU.ok) die('Falha ao criar o login: ' + (await resU.text()));
   ok('Login criado e confirmado.');
 
-  // --- gerar o config do painel ---
+  // --- gerar o config do painel (com a marca do cliente) ---
   const outName = `config.${nome}.js`;
+  const marca = cfg.marca || {};
   const configJs =
     `// Config do painel — cliente "${nome}". NÃO versionar (gitignored).\n` +
     `// Gerado pelo atalho de provisionamento em ${new Date().toISOString()}.\n` +
-    `window.CRM_CONFIG = {\n  url: ${JSON.stringify(url)},\n  anonKey: ${JSON.stringify(anon)}\n};\n`;
+    `window.CRM_CONFIG = {\n` +
+    `  url: ${JSON.stringify(url)},\n` +
+    `  anonKey: ${JSON.stringify(anon)},\n` +
+    `  marca: ${JSON.stringify(marca, null, 2).replace(/\n/g, '\n  ')}\n` +
+    `};\n`;
   await writeFile(outName, configJs, 'utf8');
   ok(`Config do painel gerado: ${outName}`);
 

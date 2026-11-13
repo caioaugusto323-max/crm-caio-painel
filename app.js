@@ -933,7 +933,32 @@ async function loadAndRender() {
 function showLogin() { el('login-view').hidden = false; el('app-view').hidden = true; }
 function showApp() { el('login-view').hidden = true; el('app-view').hidden = false; }
 
+// White label: aplica a marca do cliente (nome, sub, sigla, logo, cor) a partir
+// do config.js. Sem bloco `marca`, usa o padrão do Caio (retrocompatível).
+function applyBrand() {
+  var m = (window.CRM_CONFIG && window.CRM_CONFIG.marca) || {};
+  var nome = m.nome || 'Painel de atendimento';
+  var sub  = (m.sub != null) ? m.sub : '';
+  var sigla = m.sigla ||
+    (nome.split(/\s+/).map(function (w) { return w[0] || ''; }).join('').slice(0, 2).toUpperCase() || 'CRM');
+  var logo = m.logo || '';   // sem logo → mostra as iniciais
+  var cor  = m.cor || '#1F3A5F';
+
+  document.title = 'CRM · ' + nome + (sub ? ' — ' + sub : '');
+  document.documentElement.style.setProperty('--ink', cor);
+
+  Array.prototype.forEach.call(document.querySelectorAll('.brand-mark'), function (elm) {
+    elm.textContent = sigla;
+    if (logo) { elm.style.backgroundImage = "url('" + logo + "')"; elm.style.color = 'transparent'; }
+    else { elm.style.backgroundImage = 'none'; elm.style.color = '#fff'; }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.brand-text strong'), function (elm) { elm.textContent = nome; });
+  Array.prototype.forEach.call(document.querySelectorAll('.brand-text span'), function (elm) { elm.textContent = sub; });
+}
+
 async function boot() {
+  applyBrand();   // marca do cliente antes de qualquer tela aparecer
+
   // Login
   el('login-form').addEventListener('submit', async function (e) {
     e.preventDefault();

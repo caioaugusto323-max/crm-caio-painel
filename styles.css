@@ -24,11 +24,11 @@ button { font-family: inherit; cursor: pointer; }
 /* ---------- Marca ---------- */
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-mark {
-  display: block;
+  display: flex; align-items: center; justify-content: center;
   width: 44px; height: 44px; border-radius: 10px;
-  background: var(--ink) url("logo-caio.png") center/cover no-repeat;
+  background: var(--ink) center/cover no-repeat;   /* logo por cliente é injetado via JS (applyBrand) */
   border: 1px solid rgba(31,58,95,.35);
-  font-size: 0;   /* esconde o texto "CA" de fallback */
+  color: #fff; font-weight: 700; font-size: 15px; letter-spacing: .5px;  /* iniciais quando não há logo */
 }
 .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
 .brand-text strong {

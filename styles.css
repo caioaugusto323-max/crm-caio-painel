@@ -338,3 +338,23 @@ button { font-family: inherit; cursor: pointer; }
   /* Tabela de clientes: rola na horizontal dentro do próprio quadro */
   .cli-tbl { min-width: 560px; }
 }
+
+/* Botão de apagar lead (na ficha) — ação destrutiva, discreta até ser armada */
+.detail-danger { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.btn-delete-lead {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.btn-delete-lead:hover { background: rgba(180, 69, 47, .08); }
+.btn-delete-lead.armado {
+  background: var(--danger);
+  color: #fff;
+  font-weight: 600;
+}
+.btn-delete-lead:disabled { opacity: .6; cursor: default; }

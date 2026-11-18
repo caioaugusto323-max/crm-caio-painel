@@ -58,21 +58,19 @@ var REGUA_BLOCO_B = 'Fim padrão de Divórcio, Guarda, Pensão, Inventário e Im
 // Réguas padrão do Caio (base pra semear a tabela na 1ª vez).
 var REGUAS_PADRAO = [
   { assunto: 'divorcio', perguntas: [
-    { pergunta: 'Cidade de onde está falando.' },
     { pergunta: 'Vocês dois estão de acordo com a separação?', opcoes: 'Sim\nAinda não' },
     { pergunta: 'Tem filhos menores de idade?', opcoes: 'Sim\nNão' },
     { pergunta: 'Há gravidez no momento?', opcoes: 'Sim\nNão' },
     { pergunta: 'Em algumas palavras, explique sua situação para que o Dr. Caio possa analisar.', tipo: 'descricao' }
   ]},
   { assunto: 'guarda', perguntas: [
-    { pergunta: 'Nome e cidade de onde está falando; idade da criança envolvida.' },
+    { pergunta: 'Qual a idade da criança envolvida?' },
     { pergunta: 'Atualmente, como está a rotina de convivência e com quem a criança está morando?', opcoes: 'Morando comigo\nMorando com o outro genitor\nGuarda já fixada por juiz (precisa de alteração)\nSem acordo formal (situação informal)' },
     { pergunta: 'Já existe processo judicial em andamento sobre a guarda/pensão dessa criança, ou será a primeira vez na Justiça?' },
     { pergunta: 'Existe possibilidade de acordo amigável entre os pais, ou a situação exige ação judicial (sem consenso)?' },
     { pergunta: 'Em algumas palavras, explique sua situação para que o Dr. Caio possa analisar.', tipo: 'descricao' }
   ]},
   { assunto: 'pensao', perguntas: [
-    { pergunta: 'Nome e cidade de onde está falando.' },
     { pergunta: 'Para qual destas situações você precisa de ajuda hoje?', opcoes: 'Fixar pensão pela 1ª vez\nCobrar pensão em atraso (Execução)\nAumentar o valor atual (Revisional)\nDiminuir ou cancelar a pensão (Revisional / Exoneração)' },
     { pergunta: 'A pensão é destinada a quantos filhos (ou dependentes) e qual a idade deles?' },
     { pergunta: 'Quem deve pagar possui trabalho formal ou autônomo/informal?', opcoes: 'Carteira assinada / Servidor\nAutônomo / Empresário\nDesempregado / Sem renda formal\nNão tenho certeza' },
@@ -81,7 +79,6 @@ var REGUAS_PADRAO = [
     { pergunta: 'Em algumas palavras, explique sua situação para que o Dr. Caio possa analisar.', tipo: 'descricao' }
   ]},
   { assunto: 'inventario', perguntas: [
-    { pergunta: 'Nome e cidade de onde está falando.' },
     { pergunta: 'Qual era o seu grau de parentesco com a pessoa falecida (filho(a), cônjuge/viúvo(a), irmão(ã))?' },
     { pergunta: 'Há quanto tempo ocorreu o falecimento?', opcoes: 'Menos de 60 dias\nEntre 2 e 6 meses\nMais de 6 meses\nMais de 1 ano' },
     { pergunta: 'Existe herdeiro menor de 18 anos, incapaz, ou testamento?', opcoes: 'Todos maiores, capazes e sem testamento\nSim, há menor ou incapaz\nSim, existe testamento\nNão tenho certeza' },
@@ -90,7 +87,6 @@ var REGUAS_PADRAO = [
     { pergunta: 'Em algumas palavras, explique sua situação para que o Dr. Caio possa analisar.', tipo: 'descricao' }
   ]},
   { assunto: 'imovel', perguntas: [
-    { pergunta: 'Nome e cidade de onde está falando.' },
     { pergunta: 'Qual é o assunto principal relacionado ao imóvel?', opcoes: 'Regularizar imóvel / Obter escritura (Usucapião / Adjudicação)\nProblemas com Aluguel / Despejo / Inadimplemento\nInvasão / Disputa de Posse / Terreno\nAnulação de Venda / Distrato / Atraso na Entrega\nOutro assunto' },
     { pergunta: 'Você é o proprietário registrado, posseiro/morador, locador (dono que aluga) ou inquilino?' },
     { pergunta: 'O imóvel tem matrícula/registro definitivo no seu nome, ou só contrato de gaveta/promessa?', opcoes: 'Tem Matrícula / Registro definitivo\nApenas Contrato de Gaveta / Recibo\nNão tem documento (apenas posse de fato)\nNão sei informar' },
@@ -99,7 +95,6 @@ var REGUAS_PADRAO = [
     { pergunta: 'Em algumas palavras, explique sua situação para que o Dr. Caio possa analisar.', tipo: 'descricao' }
   ]},
   { assunto: 'outros', perguntas: [
-    { pergunta: 'Nome e cidade de onde está falando.' },
     { pergunta: 'Me conta em poucas frases qual é o assunto e o que está acontecendo — o que você busca de ajuda jurídica no momento. (relato livre; o bot repassa pro Dr. Caio, sem oferecer consulta/PIX)' }
   ]}
 ];
@@ -223,6 +218,10 @@ async function updateRegua(id, patch) {
 }
 async function deleteRegua(id) {
   var r = await sb().from('reguas').delete().eq('id', id);
+  if (r.error) throw r.error;
+}
+async function deleteLead(id) {
+  var r = await sb().from('leads').delete().eq('id', id);
   if (r.error) throw r.error;
 }
 async function seedReguas() {
@@ -416,10 +415,46 @@ function openModal(id) {
     row('Horário sugerido (não conseguiu agendar)', esc(l.horario_sugerido || '')) +
     descricaoCasoHTML(l.descricao_caso) +
     respostasHTML(l.respostas);
+  body += '<div class="detail-danger"><button type="button" class="btn-delete-lead" id="lead-del">Apagar lead</button></div>';
   el('modal-body').innerHTML = body || '<p>Sem dados.</p>';
   var compBtn = el('comp-open');
   if (compBtn) compBtn.addEventListener('click', function () { abrirComprovante(l.comprovante_url); });
+  wireDeleteLead(l);
   el('modal').hidden = false;
+}
+
+// Botão de apagar lead com confirmação em 2 cliques (sem pop-up do navegador).
+function wireDeleteLead(l) {
+  var btn = el('lead-del');
+  if (!btn) return;
+  var armado = false;
+  btn.addEventListener('click', async function () {
+    if (!armado) {
+      armado = true;
+      btn.textContent = 'Confirmar exclusão? (clique de novo)';
+      btn.classList.add('armado');
+      setTimeout(function () {
+        if (!btn) return;
+        armado = false;
+        btn.textContent = 'Apagar lead';
+        btn.classList.remove('armado');
+      }, 4000);
+      return;
+    }
+    btn.disabled = true;
+    try {
+      await deleteLead(l.id);
+      closeModal();
+      toast('Lead apagado.');
+      await loadAndRender();
+    } catch (e) {
+      btn.disabled = false;
+      armado = false;
+      btn.textContent = 'Apagar lead';
+      btn.classList.remove('armado');
+      toast('Erro ao apagar: ' + (e.message || e));
+    }
+  });
 }
 function closeModal() { el('modal').hidden = true; }
 
